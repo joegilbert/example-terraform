@@ -41,6 +41,21 @@ resource "aws_s3_bucket" "screenshots_prod" {
   bucket = "my_screenshots_bucket_prod"
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "screenshots_prod_lifecycle" {
+  bucket = aws_s3_bucket.screenshots_prod.id
+  rule {
+    id     = "intelligent_tiering_rule"
+    status = "Enabled"
+    transition {
+      days          = 30
+      storage_class = "INTELLIGENT_TIERING"
+    }
+    filter {
+      object_size_greater_than = 131072 # 128KB in bytes
+    }
+  }
+}
+
 resource "aws_db_instance" "my_db" {
   identifier          = "mysql57-extended"
   engine              = "mysql"
